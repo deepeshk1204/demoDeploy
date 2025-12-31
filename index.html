@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stranger Things – Final Episode Countdown</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            orbitron: ['Orbitron', 'sans-serif']
+          },
+          colors: {
+            stRed: '#e50914'
+          },
+          boxShadow: {
+            neon: '0 0 25px rgba(229,9,20,0.8)'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="min-h-screen flex items-center justify-center bg-black text-white font-orbitron overflow-hidden">
+
+  <!-- Background glow -->
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_#330000,_#000)]"></div>
+
+  <!-- Container -->
+  <div class="relative z-10 border border-red-900/40 rounded-2xl px-10 py-12
+              bg-black/60 backdrop-blur-md shadow-neon
+              animate-pulse">
+
+    <h1 class="text-stRed text-3xl md:text-4xl tracking-[0.3em] text-center drop-shadow-[0_0_20px_#e50914]">
+      STRANGER THINGS
+    </h1>
+
+    <p class="text-center mt-3 text-xs tracking-widest opacity-80">
+      FINAL EPISODE COUNTDOWN
+    </p>
+
+    <!-- Timer -->
+    <div class="mt-10 grid grid-cols-4 gap-6 text-center">
+      <div class="bg-black/70 rounded-xl px-4 py-6 shadow-inner shadow-red-800/40">
+        <div id="days" class="text-4xl text-stRed drop-shadow-[0_0_10px_#e50914]">00</div>
+        <div class="text-xs mt-2 tracking-widest opacity-70">DAYS</div>
+      </div>
+
+      <div class="bg-black/70 rounded-xl px-4 py-6 shadow-inner shadow-red-800/40">
+        <div id="hours" class="text-4xl text-stRed drop-shadow-[0_0_10px_#e50914]">00</div>
+        <div class="text-xs mt-2 tracking-widest opacity-70">HOURS</div>
+      </div>
+
+      <div class="bg-black/70 rounded-xl px-4 py-6 shadow-inner shadow-red-800/40">
+        <div id="minutes" class="text-4xl text-stRed drop-shadow-[0_0_10px_#e50914]">00</div>
+        <div class="text-xs mt-2 tracking-widest opacity-70">MIN</div>
+      </div>
+
+      <div class="bg-black/70 rounded-xl px-4 py-6 shadow-inner shadow-red-800/40">
+        <div id="seconds" class="text-4xl text-stRed drop-shadow-[0_0_10px_#e50914] animate-pulse">00</div>
+        <div class="text-xs mt-2 tracking-widest opacity-70">SEC</div>
+      </div>
+    </div>
+
+    <p class="text-center mt-10 text-[10px] tracking-[0.3em] opacity-50">
+      THE UPSIDE DOWN IS WAITING
+    </p>
+  </div>
+
+  <!-- Countdown Script -->
+  <script>
+    // 🔧 SET YOUR FINAL EPISODE DATE HERE
+    const targetDate = new Date("2026-01-01T00:00:00").getTime();
+
+    setInterval(() => {
+      const now = new Date().getTime();
+      const diff = targetDate - now;
+
+      if (diff <= 0) return;
+
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const m = Math.floor((diff / (1000 * 60)) % 60);
+      const s = Math.floor((diff / 1000) % 60);
+
+      document.getElementById("days").textContent = d.toString().padStart(2, "0");
+      document.getElementById("hours").textContent = h.toString().padStart(2, "0");
+      document.getElementById("minutes").textContent = m.toString().padStart(2, "0");
+      document.getElementById("seconds").textContent = s.toString().padStart(2, "0");
+    }, 1000);
+  </script>
+
+</body>
+</html>
