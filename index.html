@@ -3,157 +3,152 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Stranger Things – Final Episode Countdown</title>
+  <title>Netflix Release Tracker</title>
 
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
 
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: {
-            orbitron: ['Orbitron', 'sans-serif']
-          },
-          colors: {
-            stRed: '#e50914'
-          },
-          boxShadow: {
-            neon: '0 0 35px rgba(229,9,20,0.85)'
-          }
+          fontFamily: { orbitron: ['Orbitron', 'sans-serif'] },
+          colors: { netflixRed: '#e50914' },
+          boxShadow: { neon: '0 0 35px rgba(229,9,20,0.85)' }
         }
       }
     }
   </script>
 </head>
 
-<body class="font-orbitron text-white bg-black overflow-x-hidden">
+<body class="bg-black text-white font-orbitron overflow-x-hidden">
 
-  <!-- 🔴 BACKGROUND IMAGE -->
-  <div class="fixed inset-0 bg-cover bg-center"
-       style="background-image:url('https://i0.wp.com/thefutureoftheforce.com/wp-content/uploads/2025/10/Stranger-Things-5-Official-Poster-Header-FUTURE-OF-THE-FORCE.jpg');">
+<!-- HERO -->
+<section class="min-h-screen flex items-center justify-center text-center">
+  <div>
+    <h1 class="text-netflixRed text-5xl tracking-[0.35em] drop-shadow-[0_0_30px_#e50914]">
+      NETFLIX
+    </h1>
+    <p class="mt-4 text-xl tracking-widest opacity-80">
+      RELEASE TRACKER
+    </p>
+    <p class="mt-6 text-sm opacity-60">
+      Upcoming movies & series — auto-updated
+    </p>
   </div>
-  <div class="fixed inset-0 bg-black/80"></div>
+</section>
 
-  <!-- MAIN -->
-  <main class="relative z-10">
+<!-- FEATURED -->
+<section id="featured" class="py-24"></section>
 
-    <!-- HERO -->
-    <section class="min-h-screen flex items-center justify-center">
-      <div class="bg-black/60 backdrop-blur-md border border-red-900/40 rounded-2xl p-12 shadow-neon text-center max-w-3xl">
-        <h1 class="text-stRed text-4xl tracking-[0.35em] drop-shadow-[0_0_30px_#e50914]">
-          STRANGER THINGS
-        </h1>
+<!-- THIS MONTH -->
+<section id="thisMonth" class="py-24"></section>
 
-        <p class="mt-3 text-xs tracking-widest opacity-80">
-          FINAL EPISODE COUNTDOWN
-        </p>
+<!-- LATER -->
+<section id="later" class="py-24"></section>
 
-        <!-- TIMER -->
-        <div class="mt-10 grid grid-cols-4 gap-6">
-          <div class="bg-black/70 p-5 rounded-xl">
-            <div id="days" class="text-4xl text-stRed">00</div>
-            <div class="text-xs mt-2 opacity-60">DAYS</div>
-          </div>
-          <div class="bg-black/70 p-5 rounded-xl">
-            <div id="hours" class="text-4xl text-stRed">00</div>
-            <div class="text-xs mt-2 opacity-60">HOURS</div>
-          </div>
-          <div class="bg-black/70 p-5 rounded-xl">
-            <div id="minutes" class="text-4xl text-stRed">00</div>
-            <div class="text-xs mt-2 opacity-60">MIN</div>
-          </div>
-          <div class="bg-black/70 p-5 rounded-xl">
-            <div id="seconds" class="text-4xl text-stRed animate-pulse">00</div>
-            <div class="text-xs mt-2 opacity-60">SEC</div>
-          </div>
+<!-- LOGIC -->
+<script>
+const featuredEl = document.getElementById("featured");
+const thisMonthEl = document.getElementById("thisMonth");
+const laterEl = document.getElementById("later");
+
+fetch("./releases.json")
+  .then(res => res.json())
+  .then(data => init(data));
+
+function init(releases) {
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
+  const featured = releases.find(r => r.featured);
+  const thisMonth = releases.filter(r => {
+    const d = new Date(r.date);
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  });
+  const later = releases.filter(r => !thisMonth.includes(r) && !r.featured);
+
+  renderFeatured(featured);
+  renderGrid(thisMonth, thisMonthEl, "COMING THIS MONTH");
+  renderGrid(later, laterEl, "COMING LATER");
+}
+
+function renderFeatured(item) {
+  if (!item) return;
+
+  featuredEl.innerHTML = `
+    <div class="max-w-6xl mx-auto grid grid-cols-2 gap-12 items-center">
+      <img src="${item.poster}" class="rounded-2xl shadow-neon"/>
+      <div>
+        <h2 class="text-netflixRed text-3xl tracking-widest mb-4">
+          FEATURED
+        </h2>
+        <h3 class="text-2xl mb-6">${item.title}</h3>
+        <div id="countdown" class="flex gap-6 text-center"></div>
+      </div>
+    </div>
+  `;
+
+  startCountdown(item.date);
+}
+
+function renderGrid(items, container, title) {
+  if (!items.length) return;
+
+  container.innerHTML = `
+    <h2 class="text-center text-2xl text-netflixRed tracking-widest mb-12">${title}</h2>
+    <div class="grid grid-cols-4 gap-8 max-w-7xl mx-auto">
+      ${items.map(item => `
+        <div class="bg-black/70 p-4 rounded-xl border border-white/10 hover:border-netflixRed transition">
+          <img src="${item.poster}" class="rounded-lg mb-4"/>
+          <h4 class="text-sm mb-1">${item.title}</h4>
+          <p class="text-xs opacity-60">${formatDate(item.date)}</p>
         </div>
+      `).join("")}
+    </div>
+  `;
+}
 
-        <!-- LINKS -->
-        <div class="mt-10 flex justify-center gap-6">
-          <a href="https://www.netflix.com"
-             target="_blank"
-             class="px-6 py-3 border border-stRed text-stRed rounded-lg hover:bg-stRed hover:text-black transition">
-            WATCH ON NETFLIX
-          </a>
-          <a href="https://www.youtube.com/@strangerthings"
-             target="_blank"
-             class="px-6 py-3 border border-white/30 rounded-lg hover:border-stRed transition">
-            OFFICIAL YOUTUBE
-          </a>
-        </div>
-      </div>
-    </section>
+function startCountdown(dateStr) {
+  const target = new Date(dateStr).getTime();
+  const el = document.getElementById("countdown");
 
-    <!-- INSTAGRAM OFFICIAL -->
-    <section class="py-24">
-      <h2 class="text-center text-2xl text-stRed tracking-widest mb-12">
-        OFFICIAL INSTAGRAM
-      </h2>
+  setInterval(() => {
+    const diff = target - Date.now();
+    if (diff <= 0) return;
 
-      <div class="max-w-xl mx-auto">
-        <blockquote
-          class="instagram-media"
-          data-instgrm-permalink="https://www.instagram.com/strangerthingstv/?hl=en"
-          data-instgrm-version="14"
-          style="background:#000;">
-        </blockquote>
-      </div>
-    </section>
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor(diff / 3600000) % 24;
+    const m = Math.floor(diff / 60000) % 60;
+    const s = Math.floor(diff / 1000) % 60;
 
-    <!-- YOUTUBE SHORTS -->
-    <section class="py-24">
-      <h2 class="text-center text-2xl text-stRed tracking-widest mb-12">
-        YOUTUBE SHORTS
-      </h2>
+    el.innerHTML = `
+      ${timerBox(d,"DAYS")}
+      ${timerBox(h,"HRS")}
+      ${timerBox(m,"MIN")}
+      ${timerBox(s,"SEC")}
+    `;
+  }, 1000);
+}
 
-      <div class="grid grid-cols-3 gap-10 max-w-6xl mx-auto">
-        <iframe class="aspect-[9/16] w-full rounded-xl shadow-neon"
-                src="https://www.youtube.com/embed?listType=user_uploads&list=strangerthings"
-                allowfullscreen>
-        </iframe>
+function timerBox(val, label) {
+  return `
+    <div class="bg-black/70 px-6 py-4 rounded-xl">
+      <div class="text-3xl text-netflixRed">${String(val).padStart(2,"0")}</div>
+      <div class="text-xs opacity-60">${label}</div>
+    </div>
+  `;
+}
 
-        <iframe class="aspect-[9/16] w-full rounded-xl shadow-neon"
-                src="https://www.youtube.com/embed?listType=user_uploads&list=strangerthings"
-                allowfullscreen>
-        </iframe>
-
-        <iframe class="aspect-[9/16] w-full rounded-xl shadow-neon"
-                src="https://www.youtube.com/embed?listType=user_uploads&list=strangerthings"
-                allowfullscreen>
-        </iframe>
-      </div>
-
-      <p class="text-center mt-8 text-xs opacity-60">
-        <a href="https://www.youtube.com/@strangerthings/shorts" target="_blank" class="hover:text-stRed transition">
-          View all Shorts →
-        </a>
-      </p>
-    </section>
-
-  </main>
-
-  <!-- COUNTDOWN SCRIPT (31 Dec, 7:00 PM IST) -->
-  <script>
-    // 31 Dec, 7:00 PM IST = 13:30 UTC
-    const targetDate = new Date("2025-12-31T13:30:00Z").getTime();
-
-    setInterval(() => {
-      const diff = targetDate - Date.now();
-      if (diff <= 0) return;
-
-      days.textContent = String(Math.floor(diff / 86400000)).padStart(2, "0");
-      hours.textContent = String(Math.floor(diff / 3600000) % 24).padStart(2, "0");
-      minutes.textContent = String(Math.floor(diff / 60000) % 60).padStart(2, "0");
-      seconds.textContent = String(Math.floor(diff / 1000) % 60).padStart(2, "0");
-    }, 1000);
-  </script>
-
-  <!-- Instagram Embed -->
-  <script async src="https://www.instagram.com/embed.js"></script>
+function formatDate(d) {
+  return new Date(d).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric"
+  });
+}
+</script>
 
 </body>
 </html>
